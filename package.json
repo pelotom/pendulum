@@ -1,0 +1,25 @@
+{
+  "name": "pendulum",
+  "version": "0.0.1",
+  "description": "Yet another toy language",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pelotom/pendulum.git"
+  },
+  "scripts": {
+    "start": "tsc --pretty --watch",
+    "test": "jest --config jest.config.json --watch"
+  },
+  "keywords": [
+    "dependent",
+    "types"
+  ],
+  "author": "Thomas Crockett",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/jest": "^16.0.2",
+    "jest": "18.0.0",
+    "ts-jest": "^18.0.0",
+    "typescript": "^2.1.4"
+  }
+}

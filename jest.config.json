@@ -1,0 +1,15 @@
+{
+  "verbose": false,
+  "testRegex": ".*.spec.ts$",
+  "testPathDirs": [
+    "src"
+  ],
+  "moduleFileExtensions": [
+    "ts",
+    "js"
+  ],
+  "transform": {
+    "\\.(ts|tsx)$": "<rootDir>/node_modules/ts-jest/preprocessor"
+  },
+  "testEnvironment": "node"
+}
