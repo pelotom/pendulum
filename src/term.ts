@@ -31,6 +31,22 @@ export function a(t1: Term, t2: Term): Term {
 }
 
 // Functions
+export function eq(t1: Term, t2: Term): boolean {
+  if (t1.tag !== t2.tag)
+    return false
+
+  switch (t1.tag) {
+    case 'var':
+      return t1.name === (t2 as Var).name
+    case 'lam':
+      const l2 = t2 as Lam
+      return t1.name === l2.name && eq(t1.body, l2.body)
+    case 'app':
+      const a2 = t2 as App
+      return eq(t1.t1, a2.t1) && eq(t1.t2, a2.t2)
+  }
+}
+
 export function show(term: Term): string {
   switch (term.tag) {
     case 'var': return term.name
