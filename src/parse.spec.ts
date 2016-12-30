@@ -1,38 +1,6 @@
 import * as P from 'parsimmon'
 import { v, eq, show, Term, l, a } from './term'
-
-const termParser: P.Parser<Term> = P.lazy(() => {
-
-  const identifierParser = P.regexp(/[a-zA-Z][a-zA-Z0-9]*/).desc('variable name')
-  const varParser = identifierParser.map(v)
-
-  const lamParser = P.seqMap(
-    identifierParser
-      .desc('arrow function')
-      .skip(P.optWhitespace)
-      .skip(P.string('=>'))
-      .skip(P.optWhitespace)
-      ,
-    termParser,
-    (name, term) => l(name, term)
-  )
-
-  const parenTermParser = P.string('(')
-    .then(termParser)
-    .skip(P.string(')'))
-    .desc('parenthesized term')
-
-  return P.optWhitespace.then(P.alt(
-    lamParser,
-    varParser,
-    parenTermParser,
-  )).atLeast(1).map(function handleTermList([term, ...terms]: Term[]): Term {
-    if (terms.length === 0)
-      return term
-    const [term2, ...terms2] = terms
-    return handleTermList([a(term, term2), ...terms2])
-  })
-})
+import { termParser } from './parse'
 
 describe('var', () => {
   it('allows single alpha chars', () => {
@@ -42,7 +10,7 @@ describe('var', () => {
     expectGood('xlksajfk', v('xlksajfk'))
   })
   it('does not allow spaces', () => {
-    expectGood('kfj ksd', a(v('kfj'), v('ksd')))
+    expectBad('kfj ksd')
   })
   it('does not allow numeric characters at the beginning', () => {
     expectBad('9kfj')
@@ -69,8 +37,15 @@ describe('lam', () => {
 })
 
 describe('app', () => {
-  it('parses', () => {
-    expectGood('x x', a(v('x'), v('x')))
+  it('basic', () => {
+    expectGood('x(x)', a(v('x'), v('x')))
+  })
+  it('with spaces', () => {
+    expectGood('x (x)', a(v('x'), v('x')))
+    expectGood('x( x)', a(v('x'), v('x')))
+    expectGood('x(x ) ', a(v('x'), v('x')))
+    expectGood('x( x ) ', a(v('x'), v('x')))
+    expectGood('x ( x ) ', a(v('x'), v('x')))
   })
 })
 
