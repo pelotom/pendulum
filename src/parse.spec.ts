@@ -3,39 +3,36 @@ import { v, eq, show, Term, l, a } from './term'
 
 const termParser: P.Parser<Term> = P.lazy(() => {
 
-  const varNameParser = P.regexp(/[a-zA-Z][a-zA-Z0-9]*/).desc('variable name')
-  const varParser = varNameParser.map(v)
+  const identifierParser = P.regexp(/[a-zA-Z][a-zA-Z0-9]*/).desc('variable name')
+  const varParser = identifierParser.map(v)
 
-  const lamParser = P.oneOf('\\λ')
-    .desc('lambda expression')
-    .then(P.seqMap(
-      varNameParser
-        .skip(P.optWhitespace)
-        .skip(P.string('.'))
-        .skip(P.optWhitespace)
-        ,
-      termParser,
-      (name, term) => l(name, term)
-    ))
+  const lamParser = P.seqMap(
+    identifierParser
+      .desc('arrow function')
+      .skip(P.optWhitespace)
+      .skip(P.string('=>'))
+      .skip(P.optWhitespace)
+      ,
+    termParser,
+    (name, term) => l(name, term)
+  )
 
-  const parenthesized = P.string('(')
+  const parenTermParser = P.string('(')
     .then(termParser)
     .skip(P.string(')'))
     .desc('parenthesized term')
 
   return P.optWhitespace.then(P.alt(
-    varParser,
     lamParser,
-    parenthesized,
-  )).atLeast(1).map(handleTermList)
+    varParser,
+    parenTermParser,
+  )).atLeast(1).map(function handleTermList([term, ...terms]: Term[]): Term {
+    if (terms.length === 0)
+      return term
+    const [term2, ...terms2] = terms
+    return handleTermList([a(term, term2), ...terms2])
+  })
 })
-
-function handleTermList([term, ...terms]: Term[]): Term {
-  if (terms.length === 0)
-    return term
-  const [term2, ...terms2] = terms
-  return handleTermList([a(term, term2), ...terms2])
-}
 
 describe('var', () => {
   it('allows single alpha chars', () => {
@@ -62,15 +59,12 @@ describe('var', () => {
 })
 
 describe('lam', () => {
-  it('parses with double backslash', () => {
-    expectGood('\\x.x', l('x', v('x')))
-  })
-  it('parses with λ', () => {
-    expectGood('λx.x', l('x', v('x')))
+  it('identity', () => {
+    expectGood('x => x', l('x', v('x')))
   })
   it('allows spaces', () => {
-    expectGood('λx. x', l('x', v('x')))
-    expectGood('λx .x', l('x', v('x')))
+    expectGood('x=> x', l('x', v('x')))
+    expectGood('x =>x', l('x', v('x')))
   })
 })
 

@@ -4,10 +4,10 @@ const id = l('x', v('x'))
 
 describe('show', () => {
   it('id', () => {
-    expect(show(id)).toBe('λx.x')
+    expect(show(id)).toBe('x => x')
   })
   it('id id', () => {
-    expect(show(a(id, id))).toBe('(λx.x)(λx.x)')
+    expect(show(a(id, id))).toBe('(x => x)(x => x)')
   })
 })
 

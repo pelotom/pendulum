@@ -50,7 +50,7 @@ export function eq(t1: Term, t2: Term): boolean {
 export function show(term: Term): string {
   switch (term.tag) {
     case 'var': return term.name
-    case 'lam': return `λ${term.name}.${show(term.body)}`
+    case 'lam': return `${term.name} => ${show(term.body)}`
     case 'app': return `(${show(term.t1)})(${show(term.t2)})`
   }
 }
